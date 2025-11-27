@@ -1,7 +1,7 @@
 import format from "string-template";
 import { QueryFilter } from "./filter";
 import { aggOperator, AggregateOperator, operator, Operator } from "./operator";
-import { excludeNull } from "./utils";
+import { excludeNull, normalizeSqlArray } from "./utils";
 import { Params, QueryParams } from "./params";
 
 // We need index to distinguish multiple filters associated with the same column
@@ -64,14 +64,17 @@ const buildFilter = (
         }
       }
       return [
-        format("{key} IN :{paramKey}", { key: filter.key, paramKey: paramKey }),
+        format("{key} IN (:{paramKey})", {
+          key: filter.key,
+          paramKey: paramKey,
+        }),
         { [paramKey]: filter.value },
       ];
     case Operator.NotIn:
       if (Array.isArray(filter.value) && filter.value.length === 0)
         return ["TRUE", {}];
       return [
-        format("{key} NOT IN :{paramKey}", {
+        format("{key} NOT IN (:{paramKey})", {
           key: filter.key,
           paramKey: paramKey,
         }),
@@ -86,9 +89,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          [paramKey]: Array.isArray(filter.value)
-            ? filter.value
-            : [filter.value],
+          [paramKey]: normalizeSqlArray(
+            Array.isArray(filter.value) ? filter.value : [filter.value]
+          ),
         },
       ];
     case Operator.NotContains:
@@ -100,9 +103,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          [paramKey]: Array.isArray(filter.value)
-            ? filter.value
-            : [filter.value],
+          [paramKey]: normalizeSqlArray(
+            Array.isArray(filter.value) ? filter.value : [filter.value]
+          ),
         },
       ];
     case Operator.Overlap:
@@ -114,9 +117,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          [paramKey]: Array.isArray(filter.value)
-            ? filter.value
-            : [filter.value],
+          [paramKey]: normalizeSqlArray(
+            Array.isArray(filter.value) ? filter.value : [filter.value]
+          ),
         },
       ];
     case Operator.NotOverlap:
@@ -128,9 +131,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          [paramKey]: Array.isArray(filter.value)
-            ? filter.value
-            : [filter.value],
+          [paramKey]: normalizeSqlArray(
+            Array.isArray(filter.value) ? filter.value : [filter.value]
+          ),
         },
       ];
     default:

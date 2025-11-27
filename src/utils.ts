@@ -14,3 +14,14 @@ export function excludeNull(value: any): any {
     }, {});
   return value;
 }
+
+export function normalizeSqlArray(value: any[]): string {
+  const normalized: string[] = [];
+  for (const item of value)
+    try {
+      normalized.push(JSON.parse(item).toString());
+    } catch {
+      normalized.push(JSON.stringify(item));
+    }
+  return `{${normalized.join(",")}}`;
+}
