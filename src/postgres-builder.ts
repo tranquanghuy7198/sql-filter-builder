@@ -18,7 +18,7 @@ const buildFilter = (
           operator: filter.value !== null ? operator(filter.operator) : "IS",
           paramKey: paramKey,
         }),
-        { paramKey: filter.value },
+        { [paramKey]: filter.value },
       ];
     case Operator.Neq:
       return [
@@ -28,7 +28,7 @@ const buildFilter = (
             filter.value !== null ? operator(filter.operator) : "IS NOT",
           paramKey: paramKey,
         }),
-        { paramKey: filter.value },
+        { [paramKey]: filter.value },
       ];
     case Operator.Like:
       return [
@@ -37,7 +37,7 @@ const buildFilter = (
           operator: operator(filter.operator),
           paramKey: paramKey,
         }),
-        { paramKey: `%${filter.value}%` },
+        { [paramKey]: `%${filter.value}%` },
       ];
     case Operator.LikeCi:
       return [
@@ -46,7 +46,7 @@ const buildFilter = (
           operator: operator(filter.operator),
           paramKey: paramKey,
         }),
-        { paramKey: `%${filter.value}%` },
+        { [paramKey]: `%${filter.value}%` },
       ];
     case Operator.In:
       if (Array.isArray(filter.value)) {
@@ -61,7 +61,7 @@ const buildFilter = (
       }
       return [
         format("{key} IN :{paramKey}", { key: filter.key, paramKey: paramKey }),
-        { paramKey: filter.value },
+        { [paramKey]: filter.value },
       ];
     case Operator.NotIn:
       if (Array.isArray(filter.value) && filter.value.length === 0)
@@ -71,7 +71,7 @@ const buildFilter = (
           key: filter.key,
           paramKey: paramKey,
         }),
-        { paramKey: filter.value },
+        { [paramKey]: filter.value },
       ];
     case Operator.Contains:
       if (Array.isArray(filter.value) && filter.value.length === 0)
@@ -82,7 +82,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          paramKey: Array.isArray(filter.value) ? filter.value : [filter.value],
+          [paramKey]: Array.isArray(filter.value)
+            ? filter.value
+            : [filter.value],
         },
       ];
     case Operator.NotContains:
@@ -94,7 +96,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          paramKey: Array.isArray(filter.value) ? filter.value : [filter.value],
+          [paramKey]: Array.isArray(filter.value)
+            ? filter.value
+            : [filter.value],
         },
       ];
     case Operator.Overlap:
@@ -106,7 +110,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          paramKey: Array.isArray(filter.value) ? filter.value : [filter.value],
+          [paramKey]: Array.isArray(filter.value)
+            ? filter.value
+            : [filter.value],
         },
       ];
     case Operator.NotOverlap:
@@ -118,7 +124,9 @@ const buildFilter = (
           paramKey: paramKey,
         }),
         {
-          paramKey: Array.isArray(filter.value) ? filter.value : [filter.value],
+          [paramKey]: Array.isArray(filter.value)
+            ? filter.value
+            : [filter.value],
         },
       ];
     default:
@@ -128,7 +136,7 @@ const buildFilter = (
           operator: operator(filter.operator),
           paramKey: paramKey,
         }),
-        { paramKey: filter.value },
+        { [paramKey]: filter.value },
       ];
   }
 };
