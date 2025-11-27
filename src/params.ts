@@ -1,7 +1,19 @@
 import { Filter } from "./filter";
 import { AggregateOperator } from "./operator";
 
-export class Params {
+export type Params = {
+  page?: number;
+  size?: number;
+  filters?: Filter[];
+  orders?: string[];
+  breakdowns?: string[];
+  totalAggregators?: Record<string, AggregateOperator>;
+  includeTotal?: boolean;
+  includeData?: boolean;
+  cache?: boolean;
+};
+
+export class QueryParams {
   page: number = 1;
   size: number = 10;
   filters: Filter[] = [];
@@ -12,17 +24,7 @@ export class Params {
   includeData: boolean = true;
   cache: boolean = false; // cache query result
 
-  constructor(params: {
-    page?: number;
-    size?: number;
-    filters?: Filter[];
-    orders?: string[];
-    breakdowns?: string[];
-    totalAggregators?: Record<string, AggregateOperator>;
-    includeTotal?: boolean;
-    includeData?: boolean;
-    cache?: boolean;
-  }) {
+  constructor(params: Params) {
     if (params.page) this.page = params.page;
     if (params.size) this.size = params.size;
     if (params.filters) this.filters = params.filters;
@@ -39,42 +41,42 @@ export class Params {
     return new Set(this.filters.map((filter) => filter.key));
   }
 
-  public withTotal(): Params {
+  public withTotal(): QueryParams {
     this.includeTotal = true;
     return this;
   }
 
-  public withoutTotal(): Params {
+  public withoutTotal(): QueryParams {
     this.includeTotal = false;
     return this;
   }
 
-  public withData(): Params {
+  public withData(): QueryParams {
     this.includeData = true;
     return this;
   }
 
-  public withoutData(): Params {
+  public withoutData(): QueryParams {
     this.includeData = false;
     return this;
   }
 
-  public withoutPagination(): Params {
+  public withoutPagination(): QueryParams {
     this.size = -1;
     return this;
   }
 
-  public withCache(): Params {
+  public withCache(): QueryParams {
     this.cache = true;
     return this;
   }
 
-  public withoutCache(): Params {
+  public withoutCache(): QueryParams {
     this.cache = false;
     return this;
   }
 
-  public withAllowedFilters(allowedKeys: Set<string>): Params {
+  public withAllowedFilters(allowedKeys: Set<string>): QueryParams {
     this.filters = this.filters.filter((filter) => allowedKeys.has(filter.key));
     return this;
   }
@@ -97,7 +99,7 @@ export class Params {
       if (!this.filterKeys.has(filter.key)) this.filters.push(filter);
   }
 
-  public withAllowedOrders(allowedKeys: Set<string>): Params {
+  public withAllowedOrders(allowedKeys: Set<string>): QueryParams {
     this.orders = this.orders.filter((order) => allowedKeys.has(order));
     return this;
   }
@@ -125,7 +127,7 @@ export class Params {
         if (order === originField) this.orders[index] = rewriteField;
   }
 
-  public withoutOrders(): Params {
+  public withoutOrders(): QueryParams {
     this.orders = [];
     return this;
   }
@@ -152,16 +154,16 @@ export class Params {
     return this.filters.every((filter) => filter.accept(key, value));
   }
 
-  public excludeFilters(keys: string[]): Params {
-    const newParams = Object.assign(new Params({}), this);
+  public excludeFilters(keys: string[]): QueryParams {
+    const newParams = Object.assign(new QueryParams({}), this);
     newParams.filters = newParams.filters.filter(
       (filter) => !keys.includes(filter.key)
     );
     return newParams;
   }
 
-  public replaceFilters(fromKey: string, toKey: string): Params {
-    const newParams = Object.assign(new Params({}), this);
+  public replaceFilters(fromKey: string, toKey: string): QueryParams {
+    const newParams = Object.assign(new QueryParams({}), this);
     for (const filter of newParams.filters)
       if (filter.key === fromKey) filter.key = toKey;
     return newParams;
