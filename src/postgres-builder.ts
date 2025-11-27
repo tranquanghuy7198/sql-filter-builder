@@ -1,12 +1,12 @@
 import format from "string-template";
-import { Filter } from "./filter";
+import { QueryFilter } from "./filter";
 import { aggOperator, AggregateOperator, operator, Operator } from "./operator";
 import { excludeNull } from "./utils";
 import { Params, QueryParams } from "./params";
 
 // We need index to distinguish multiple filters associated with the same column
 const buildFilter = (
-  filter: Filter,
+  filter: QueryFilter,
   index: number
 ): [string, Record<string, any>] => {
   const paramKey = `${filter.key}_${index}`;
@@ -53,7 +53,11 @@ const buildFilter = (
         if (filter.value.length === 0) return ["FALSE", {}];
         if (filter.value.some((item) => item === null)) {
           const [query, params] = buildFilter(
-            new Filter(filter.key, filter.operator, excludeNull(filter.value)),
+            new QueryFilter({
+              key: filter.key,
+              operator: filter.operator,
+              value: excludeNull(filter.value),
+            }),
             index
           );
           return [`${filter.key} IS NULL OR ${query}`, params];
@@ -141,7 +145,9 @@ const buildFilter = (
   }
 };
 
-const buildFilters = (filters: Filter[]): [string, Record<string, any>] => {
+const buildFilters = (
+  filters: QueryFilter[]
+): [string, Record<string, any>] => {
   const queries: string[] = [];
   const params: Record<string, any> = {};
   filters.forEach((filter, index) => {

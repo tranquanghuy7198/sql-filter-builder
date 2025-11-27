@@ -1,15 +1,21 @@
 import * as minimatch from "minimatch";
 import { Operator } from "./operator";
 
-export class Filter {
+export type Filter = {
+  key: string;
+  operator: Operator;
+  value: any;
+};
+
+export class QueryFilter {
   key: string;
   operator: Operator;
   value: any;
 
-  constructor(key: string, operator: Operator, value: any) {
-    this.key = key;
-    this.operator = operator;
-    this.value = value;
+  constructor(filter: Filter) {
+    this.key = filter.key;
+    this.operator = filter.operator;
+    this.value = filter.value;
   }
 
   public accept(key: string, value: any): boolean {

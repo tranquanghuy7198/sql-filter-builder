@@ -1,10 +1,10 @@
-import { Filter } from "./filter";
+import { QueryFilter } from "./filter";
 import { AggregateOperator } from "./operator";
 
 export type Params = {
   page?: number;
   size?: number;
-  filters?: Filter[];
+  filters?: QueryFilter[];
   orders?: string[];
   breakdowns?: string[];
   totalAggregators?: Record<string, AggregateOperator>;
@@ -16,7 +16,7 @@ export type Params = {
 export class QueryParams {
   page: number = 1;
   size: number = 10;
-  filters: Filter[] = [];
+  filters: QueryFilter[] = [];
   orders: string[] = [];
   breakdowns: string[] = [];
   totalAggregators: Record<string, AggregateOperator> = {};
@@ -87,7 +87,7 @@ export class QueryParams {
 
   public validateFilters(
     allowedFilters: Set<string>,
-    defaultFilters: Filter[] = []
+    defaultFilters: QueryFilter[] = []
   ) {
     if (!this.containsFilters(allowedFilters))
       throw new Error(
