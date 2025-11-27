@@ -14,7 +14,6 @@ A lightweight, type-safe SQL filter/query builder for Node.js + TypeScript
 
 - ✔️ Easy to use
 - ✔️ Fully type-safe (written in TypeScript)
-- ✔️ Supports nested logical operators (AND / OR)
 - ✔️ Prevents SQL injection by using parameter bindings
 - ✔️ Zero dependencies
 - ✔️ Flexible enough for any SQL stack
@@ -40,7 +39,9 @@ import { buildDataQuery, Filter, Operator, Params } from "sql-filter-builder";
 
 const baseSql = "select colA, colB from tableX";
 
-const params = { filters: [new Filter("colC", Operator.Eq, "some-value")] };
+const params = {
+  filters: [{ key: "colC", operator: Operator.Eq, value: "some-value" }],
+};
 
 const [sql, values] = buildDataQuery(baseSql, params);
 
@@ -61,7 +62,9 @@ const sequelize = new Sequelize(/* your configs */);
 
 // Prepare SQL and params
 const baseSql = "select colA, colB from tableX";
-const params = { filters: [new Filter("colC", Operator.Eq, "some-value")] };
+const params = {
+  filters: [{ key: "colC", operator: Operator.Eq, value: "some-value" }],
+};
 
 // Build customized query
 const [querySql, queryParams] = buildDataQuery(baseSql, params);
@@ -73,3 +76,7 @@ const results = await sequelize.query(querySql, {
 });
 console.log(results);
 ```
+
+## Advanced Usage
+
+Beside filters, `sql-filter-builder` supports orders and aggregators as well. How can freely filter, sort and page the results based on customized requests. The `Params` and `Filter` types are provided to make it convenient to communicate between frontend and backend.
