@@ -12,6 +12,29 @@ export class Params {
   includeData: boolean = true;
   cache: boolean = false; // cache query result
 
+  constructor(params: {
+    page?: number;
+    size?: number;
+    filters?: Filter[];
+    orders?: string[];
+    breakdowns?: string[];
+    totalAggregators?: Record<string, AggregateOperator>;
+    includeTotal?: boolean;
+    includeData?: boolean;
+    cache?: boolean;
+  }) {
+    if (params.page) this.page = params.page;
+    if (params.size) this.size = params.size;
+    if (params.filters) this.filters = params.filters;
+    if (params.orders) this.orders = params.orders;
+    if (params.breakdowns) this.breakdowns = params.breakdowns;
+    if (params.totalAggregators)
+      this.totalAggregators = params.totalAggregators;
+    if (params.includeTotal) this.includeTotal = params.includeTotal;
+    if (params.includeData) this.includeData = params.includeData;
+    if (params.cache) this.cache = params.cache;
+  }
+
   get filterKeys(): Set<string> {
     return new Set(this.filters.map((filter) => filter.key));
   }
@@ -130,7 +153,7 @@ export class Params {
   }
 
   public excludeFilters(keys: string[]): Params {
-    const newParams = Object.assign(new Params(), this);
+    const newParams = Object.assign(new Params({}), this);
     newParams.filters = newParams.filters.filter(
       (filter) => !keys.includes(filter.key)
     );
@@ -138,7 +161,7 @@ export class Params {
   }
 
   public replaceFilters(fromKey: string, toKey: string): Params {
-    const newParams = Object.assign(new Params(), this);
+    const newParams = Object.assign(new Params({}), this);
     for (const filter of newParams.filters)
       if (filter.key === fromKey) filter.key = toKey;
     return newParams;
