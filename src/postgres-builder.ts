@@ -2,7 +2,7 @@ import format from "string-template";
 import { Filter } from "./filter";
 import { aggOperator, AggregateOperator, operator, Operator } from "./operator";
 import { excludeNull } from "./utils";
-import { QueryParams } from "./params";
+import { Params, QueryParams } from "./params";
 
 // We need index to distinguish multiple filters associated with the same column
 const buildFilter = (
@@ -178,8 +178,9 @@ const buildAggregators = (
 
 export const buildTotalQuery = (
   baseSql: string,
-  params: QueryParams
+  rawParams: Params
 ): [string, Record<string, any>] => {
+  const params = new QueryParams(rawParams);
   const [querySql, queryParams] = buildFilters(params.filters);
   if (!("*" in params.totalAggregators))
     params.totalAggregators["*"] = AggregateOperator.Count;
@@ -197,8 +198,9 @@ export const buildTotalQuery = (
 
 export const buildDataQuery = (
   baseSql: string,
-  params: QueryParams
+  rawParams: Params
 ): [string, Record<string, any>] => {
+  const params = new QueryParams(rawParams);
   const [querySql, queryParams] = buildFilters(params.filters);
   const orderSql = buildOrders(params.orders);
   let sqlSelect = `
