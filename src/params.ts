@@ -1,10 +1,10 @@
-import { QueryFilter } from "./filter";
+import { Filter, QueryFilter } from "./filter";
 import { AggregateOperator } from "./operator";
 
 export type Params = {
   page?: number;
   size?: number;
-  filters?: QueryFilter[];
+  filters?: Filter[];
   orders?: string[];
   breakdowns?: string[];
   totalAggregators?: Record<string, AggregateOperator>;
@@ -27,7 +27,8 @@ export class QueryParams {
   constructor(params: Params) {
     if (params.page) this.page = params.page;
     if (params.size) this.size = params.size;
-    if (params.filters) this.filters = params.filters;
+    if (params.filters)
+      this.filters = params.filters.map((filter) => new QueryFilter(filter));
     if (params.orders) this.orders = params.orders;
     if (params.breakdowns) this.breakdowns = params.breakdowns;
     if (params.totalAggregators)
