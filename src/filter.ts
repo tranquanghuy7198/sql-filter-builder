@@ -53,10 +53,7 @@ export class QueryFilter {
       this.operator === Operator.Like &&
       (typeof value !== "string" ||
         typeof this.value !== "string" ||
-        !minimatch.minimatch(
-          value,
-          this.value.replace(/%/g, "*").replace(/_/g, "?")
-        ))
+        !minimatch.minimatch(value, `*${this.value}*`))
     )
       return false;
     if (
@@ -65,7 +62,7 @@ export class QueryFilter {
         typeof this.value !== "string" ||
         !minimatch.minimatch(
           value.toLowerCase(),
-          this.value.toLowerCase().replace(/%/g, "*").replace(/_/g, "?")
+          `*${this.value.toLowerCase()}*`
         ))
     )
       return false;
