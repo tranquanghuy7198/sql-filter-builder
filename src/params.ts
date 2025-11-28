@@ -25,17 +25,18 @@ export class QueryParams {
   cache: boolean = false; // cache query result
 
   constructor(params: Params) {
-    if (params.page) this.page = params.page;
-    if (params.size) this.size = params.size;
-    if (params.filters)
+    if (params.page !== undefined) this.page = params.page;
+    if (params.size !== undefined) this.size = params.size;
+    if (params.filters !== undefined)
       this.filters = params.filters.map((filter) => new QueryFilter(filter));
-    if (params.orders) this.orders = params.orders;
-    if (params.breakdowns) this.breakdowns = params.breakdowns;
-    if (params.totalAggregators)
+    if (params.orders !== undefined) this.orders = params.orders;
+    if (params.breakdowns !== undefined) this.breakdowns = params.breakdowns;
+    if (params.totalAggregators !== undefined)
       this.totalAggregators = params.totalAggregators;
-    if (params.includeTotal) this.includeTotal = params.includeTotal;
-    if (params.includeData) this.includeData = params.includeData;
-    if (params.cache) this.cache = params.cache;
+    if (params.includeTotal !== undefined)
+      this.includeTotal = params.includeTotal;
+    if (params.includeData !== undefined) this.includeData = params.includeData;
+    if (params.cache !== undefined) this.cache = params.cache;
   }
 
   get filterKeys(): Set<string> {
