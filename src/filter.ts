@@ -1,5 +1,6 @@
 import * as minimatch from "minimatch";
 import { Operator } from "./operator";
+import { camelToSnake } from "./utils";
 
 export type Filter = {
   key: string;
@@ -13,7 +14,7 @@ export class QueryFilter {
   value: any;
 
   constructor(filter: Filter) {
-    this.key = filter.key;
+    this.key = camelToSnake(filter.key);
     this.operator = filter.operator;
     this.value = filter.value;
   }

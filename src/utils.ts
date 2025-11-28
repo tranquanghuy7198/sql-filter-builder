@@ -25,3 +25,11 @@ export function normalizeSqlArray(value: any[]): string {
     }
   return `{${normalized.join(",")}}`;
 }
+
+export const camelToSnake = (str: string): string => {
+  if (str.includes("_")) return str;
+  return str
+    .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+    .replace(/([A-Z]+)([A-Z][a-z0-9])/g, "$1_$2")
+    .toLowerCase();
+};

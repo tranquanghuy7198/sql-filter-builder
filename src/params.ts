@@ -1,5 +1,6 @@
 import { Filter, QueryFilter } from "./filter";
 import { AggregateOperator } from "./operator";
+import { camelToSnake } from "./utils";
 
 export type Params = {
   page?: number;
@@ -29,10 +30,17 @@ export class QueryParams {
     if (params.size !== undefined) this.size = params.size;
     if (params.filters !== undefined)
       this.filters = params.filters.map((filter) => new QueryFilter(filter));
-    if (params.orders !== undefined) this.orders = params.orders;
-    if (params.breakdowns !== undefined) this.breakdowns = params.breakdowns;
+    if (params.orders !== undefined)
+      this.orders = params.orders.map(camelToSnake);
+    if (params.breakdowns !== undefined)
+      this.breakdowns = params.breakdowns.map(camelToSnake);
     if (params.totalAggregators !== undefined)
-      this.totalAggregators = params.totalAggregators;
+      this.totalAggregators = Object.fromEntries(
+        Object.entries(params.totalAggregators).map(([key, aggOp]) => [
+          camelToSnake(key),
+          aggOp,
+        ])
+      );
     if (params.includeTotal !== undefined)
       this.includeTotal = params.includeTotal;
     if (params.includeData !== undefined) this.includeData = params.includeData;
