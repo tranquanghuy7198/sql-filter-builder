@@ -188,7 +188,7 @@ const buildAggregators = (
 export const buildTotalQuery = (
   baseSql: string,
   rawParams: Params
-): [string, Record<string, any>] => {
+): [string, Record<string, any>, QueryParams] => {
   const params = new QueryParams(rawParams);
   const [querySql, queryParams] = buildFilters(params.filters);
   if (!("*" in params.totalAggregators))
@@ -202,13 +202,13 @@ export const buildTotalQuery = (
     from result
     where ${querySql}
   `;
-  return [sqlCount, queryParams];
+  return [sqlCount, queryParams, params];
 };
 
 export const buildDataQuery = (
   baseSql: string,
   rawParams: Params
-): [string, Record<string, any>] => {
+): [string, Record<string, any>, QueryParams] => {
   const params = new QueryParams(rawParams);
   const [querySql, queryParams] = buildFilters(params.filters);
   const orderSql = buildOrders(params.orders);
@@ -226,5 +226,5 @@ export const buildDataQuery = (
       offset ${(params.page - 1) * params.size}
       limit ${params.size}
     `;
-  return [sqlSelect, queryParams];
+  return [sqlSelect, queryParams, params];
 };
