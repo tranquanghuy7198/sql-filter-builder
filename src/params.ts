@@ -39,7 +39,7 @@ export class QueryParams {
         Object.entries(params.totalAggregators).map(([key, aggOp]) => [
           camelToSnake(key),
           aggOp,
-        ])
+        ]),
       );
     if (params.includeTotal !== undefined)
       this.includeTotal = params.includeTotal;
@@ -97,13 +97,13 @@ export class QueryParams {
 
   public validateFilters(
     allowedFilters: Set<string>,
-    defaultFilters: QueryFilter[] = []
+    defaultFilters: QueryFilter[] = [],
   ) {
     if (!this.containsFilters(allowedFilters))
       throw new Error(
         `One of filters is not allowed. Allowed filters: ${Array.from(
-          allowedFilters
-        ).join(", ")}`
+          allowedFilters,
+        ).join(", ")}`,
       );
     for (const filter of defaultFilters)
       if (!this.filterKeys.has(filter.key)) this.filters.push(filter);
@@ -120,13 +120,13 @@ export class QueryParams {
 
   public validateOrders(
     allowedOrders: Set<string>,
-    defaultOrders: string[] = []
+    defaultOrders: string[] = [],
   ) {
     if (!this.containsOrders(allowedOrders))
       throw new Error(
         `One of orders is not allowed. Allowed orders: ${Array.from(
-          allowedOrders
-        ).join(", ")}`
+          allowedOrders,
+        ).join(", ")}`,
       );
     if (this.orders.length === 0) this.orders = defaultOrders;
   }
@@ -148,15 +148,15 @@ export class QueryParams {
 
   public validateBreakdowns(
     allowedBreakdowns: Set<string>,
-    defaultBreakdowns: string[] = []
+    defaultBreakdowns: string[] = [],
   ) {
     this.breakdowns =
       this.breakdowns.length > 0 ? this.breakdowns : defaultBreakdowns;
     if (!this.containsBreakdowns(allowedBreakdowns))
       throw new Error(
         `One of breakdowns is not allowed. Allowed breakdowns: ${Array.from(
-          allowedBreakdowns
-        ).join(", ")}`
+          allowedBreakdowns,
+        ).join(", ")}`,
       );
   }
 
@@ -167,7 +167,7 @@ export class QueryParams {
   public excludeFilters(keys: string[]): QueryParams {
     const newParams = Object.assign(new QueryParams({}), this);
     newParams.filters = newParams.filters.filter(
-      (filter) => !keys.includes(filter.key)
+      (filter) => !keys.includes(filter.key),
     );
     return newParams;
   }
@@ -181,7 +181,7 @@ export class QueryParams {
 
   public containsAggregatedFields(keys: Set<string>): boolean {
     return Array.from(Object.keys(this.totalAggregators)).every((key) =>
-      keys.has(key)
+      keys.has(key),
     );
   }
 
@@ -189,8 +189,36 @@ export class QueryParams {
     if (!this.containsAggregatedFields(allowedFields))
       throw new Error(
         `One of aggregated fields is not allowed. Allowed fields: ${Array.from(
-          allowedFields
-        ).join(", ")}`
+          allowedFields,
+        ).join(", ")}`,
       );
+  }
+
+  public apply<T extends Record<string, unknown>>(data: T[]): T[] {
+    const collator = new Intl.Collator(undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+
+    return data
+      .filter((item) =>
+        this.filters.every((filter) =>
+          filter.accept(filter.key, item[filter.key]),
+        ),
+      )
+      .sort((a, b) => {
+        for (const order of this.orders) {
+          const isDesc = order.startsWith("-");
+          const field = isDesc ? order.slice(1) : order;
+          if (a[field] === b[field]) continue;
+          const result = collator.compare(
+            String(a[field] ?? ""),
+            String(b[field] ?? ""),
+          );
+          return isDesc ? -result : result;
+        }
+        return 0;
+      })
+      .slice(this.size * (this.page - 1), this.size * this.page);
   }
 }
