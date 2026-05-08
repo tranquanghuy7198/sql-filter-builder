@@ -9,18 +9,21 @@ export type Filter = {
 };
 
 export class QueryFilter {
+  originalKey: string;
   key: string;
   operator: Operator;
   value: any;
 
   constructor(filter: Filter) {
+    this.originalKey = filter.key;
     this.key = camelToSnake(filter.key);
     this.operator = filter.operator;
     this.value = filter.value;
   }
 
-  public accept(key: string, value: any): boolean {
-    if (key !== this.key) return true;
+  // This function is built to manually apply on objects, so we must use originalKey
+  public accept(obj: Record<string, any>): boolean {
+    const value = obj[this.originalKey];
     if (this.operator === Operator.Eq && value !== this.value) return false;
     if (this.operator === Operator.Neq && value === this.value) return false;
     if (this.operator === Operator.Gt && value <= this.value) return false;
@@ -62,7 +65,7 @@ export class QueryFilter {
         typeof this.value !== "string" ||
         !minimatch.minimatch(
           value.toLowerCase(),
-          `*${this.value.toLowerCase()}*`
+          `*${this.value.toLowerCase()}*`,
         ))
     )
       return false;

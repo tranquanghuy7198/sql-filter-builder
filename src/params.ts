@@ -18,7 +18,9 @@ export class QueryParams {
   page: number = 1;
   size: number = 10;
   filters: QueryFilter[] = [];
+  originalOrders: string[] = [];
   orders: string[] = [];
+  originalBreakdowns: string[] = [];
   breakdowns: string[] = [];
   totalAggregators: Record<string, AggregateOperator> = {};
   includeTotal: boolean = false;
@@ -30,10 +32,14 @@ export class QueryParams {
     if (params.size !== undefined) this.size = params.size;
     if (params.filters !== undefined)
       this.filters = params.filters.map((filter) => new QueryFilter(filter));
-    if (params.orders !== undefined)
+    if (params.orders !== undefined) {
+      this.originalOrders = params.orders;
       this.orders = params.orders.map(camelToSnake);
-    if (params.breakdowns !== undefined)
+    }
+    if (params.breakdowns !== undefined) {
+      this.originalBreakdowns = params.breakdowns;
       this.breakdowns = params.breakdowns.map(camelToSnake);
+    }
     if (params.totalAggregators !== undefined)
       this.totalAggregators = Object.fromEntries(
         Object.entries(params.totalAggregators).map(([key, aggOp]) => [
@@ -160,8 +166,8 @@ export class QueryParams {
       );
   }
 
-  public accept(key: string, value: any): boolean {
-    return this.filters.every((filter) => filter.accept(key, value));
+  public accept(obj: Record<string, any>): boolean {
+    return this.filters.every((filter) => filter.accept(obj));
   }
 
   public excludeFilters(keys: string[]): QueryParams {
@@ -194,20 +200,17 @@ export class QueryParams {
       );
   }
 
-  public apply<T extends Record<string, unknown>>(data: T[]): T[] {
+  // This function is built to manually apply on objects, so we must use originalOrders
+  public apply<T extends Record<string, unknown>>(data: T[]): [number, T[]] {
     const collator = new Intl.Collator(undefined, {
       numeric: true,
       sensitivity: "base",
     });
 
-    return data
-      .filter((item) =>
-        this.filters.every((filter) =>
-          filter.accept(filter.key, item[filter.key]),
-        ),
-      )
+    const filtered = data
+      .filter((item) => this.accept(item))
       .sort((a, b) => {
-        for (const order of this.orders) {
+        for (const order of this.originalOrders) {
           const isDesc = order.startsWith("-");
           const field = isDesc ? order.slice(1) : order;
           if (a[field] === b[field]) continue;
@@ -218,7 +221,12 @@ export class QueryParams {
           return isDesc ? -result : result;
         }
         return 0;
-      })
-      .slice(this.size * (this.page - 1), this.size * this.page);
+      });
+    const total = filtered.length;
+    const paginated =
+      this.size > 0
+        ? filtered.slice((this.page - 1) * this.size, this.page * this.size)
+        : filtered;
+    return [total, paginated];
   }
 }
